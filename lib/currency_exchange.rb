@@ -9,7 +9,7 @@ module CurrencyExchange
   require 'json'
 
 
- def self.rate(date, from_currency, to_currency, file_path) #add file path and base currency here
+ def self.rate(date, from_currency, to_currency, file_path, base_currency = "EUR") #add file path and base currency here
   
   date_str = date.is_a?(String) ? date : date.strftime('%Y-%m-%d')
 
@@ -28,13 +28,24 @@ module CurrencyExchange
     # Extract the rates for the given date
     rates = data[date_str]
 
-    # Check if both currencies exist in the rates
-    unless rates[from_currency] && rates[to_currency]
-      raise "Exception Raised: Unable to calculate the exchange rate"
+    if to_currency == base_currency
+      to_currency = 1
+    elsif !rates[to_currency]
+      raise "Exception Raised: No rate for to_currency #{to_currency}"
+    else
+      to_currency = rates[to_currency]
+    end
+
+    if from_currency == base_currency
+      from_currency = 1
+    elsif !rates[from_currency]
+      raise "Exception Raised: No rate for from_currency #{from_currency}"
+    else
+      from_currency = rates[from_currency]
     end
 
     # Calculate and return the exchange rate
-    return rates[to_currency] / rates[from_currency]
+    return to_currency.to_f / from_currency.to_f
  end
   private
 
